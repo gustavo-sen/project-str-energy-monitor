@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;energy-monitor-NF446re/Middlewares/Third_Party/bluetooth-driver&apos; to &apos;BluetoothDriver&apos;" description="Rename resource &apos;bluetooth-driver&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Middlewares/Third_Party/bluetooth-driver" name="BluetoothDriver" stamp="1716327017169" updateReferences="true"/>
+</session>

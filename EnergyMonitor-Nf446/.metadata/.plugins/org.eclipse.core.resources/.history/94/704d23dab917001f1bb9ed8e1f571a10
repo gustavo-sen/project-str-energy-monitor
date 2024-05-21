@@ -1,0 +1,21 @@
+/*
+ * hc_bluetooth.cpp
+ *
+ *  Created on: May 21, 2024
+ *      Author: gusta
+ */
+#include "main.h"
+
+UART_HandleTypeDef huart3;
+
+void init_hc05(){
+
+}
+
+/*
+ * @breaf check if HC-05 is connected
+ * @return 1 if its working
+ */
+int check_bl_con(){
+	huart3.
+}
