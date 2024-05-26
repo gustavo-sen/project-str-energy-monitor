@@ -23,16 +23,9 @@ target_include_directories(stm32cubemx INTERFACE
     ../../Drivers/CMSIS/Include
 )
 
-file(GLOB_RECURSE SOURCES 
-    "../../Core/Src/*.c"
-    "../../Middlewares/Third_Party/FreeRTOS/Source/*.c"
-    "../../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/*.c"
-    "../../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/*.c"
-    "../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/*.c"
-)
-
 target_sources(stm32cubemx INTERFACE
     ../../Core/Src/main.c
+    ../../Core/Src/hc05_bluetooth.c
     ../../Core/Src/lcd_interface.c
     ../../Core/Src/freertos.c
     ../../Core/Src/stm32f4xx_it.c
