@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "lcd_interface.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -392,12 +393,16 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+  lcd_init(hi2c1);
+  lcd_send_string("iniciando");
+  LCD_set_cursor_pos(2,2);
+  lcd_send_string("pedro angelus");
   for(;;)
   { 
-    const unsigned char* pData = (unsigned char) "hello world\n\r";
-
-    HAL_UART_Transmit(&huart3, (uint8_t*) pData, sizeof(pData), 500);
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    // const unsigned char* pData = (unsigned char) "hello world\n\r";
+    
+    // HAL_UART_Transmit(&huart3, (uint8_t*) pData, 1, 100);
+    // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
     vTaskDelay(1000);
   }
   /* USER CODE END 5 */
