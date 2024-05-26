@@ -19,6 +19,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "lcd_interface.h"
+#include "hc05_bluetooth.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -392,12 +394,14 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+  lcd_init(hi2c1);
+  hc05_bluetooth_init(huart3);
+  lcd_send_string("pedro angelus");
+  setLCDBrightness(26);
   for(;;)
   { 
-    const unsigned char* pData = (unsigned char) "hello world\n\r";
-
-    HAL_UART_Transmit(&huart3, (uint8_t*) pData, sizeof(pData), 500);
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    char pedro[] = "Pedro Angelus\n\r";
+    hc05_send_data(pedro);
     vTaskDelay(1000);
   }
   /* USER CODE END 5 */
