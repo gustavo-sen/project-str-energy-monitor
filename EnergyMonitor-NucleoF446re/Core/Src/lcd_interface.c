@@ -1,5 +1,6 @@
 #include "lcd_interface.h"
 
+static uint8_t backlight = 1;
 static I2C_HandleTypeDef hi2c1;
 
 void lcd_send_cmd (char cmd){
@@ -63,14 +64,32 @@ void lcd_init (I2C_HandleTypeDef _hi2c){
 *@param string_z
 *@return 
 */
-void lcd_send_string (char *str){
+void lcd_send_string (const char *str){
 	while (*str) lcd_send_data (*str++);
-}
-
-void LCD_set_cursor_pos(uint8_t col, uint8_t row) {
-    //TODO implement LCD position
 }
 
 void lcd_clear(){
     lcd_send_cmd(CLEAR_CMD);
+	HAL_Delay(10);
 }
+
+void lcd_set_backligth(uint8_t state){
+  if(state) backlight = 1;
+  else backlight = 0 ;
+}
+
+void lcd_put_cur(int lin, int col) {
+    uint8_t addr = 0;
+    uint8_t lin_address[4] = {0x00, 0x40, 0x14, 0x54};
+
+    if (LCD_ROWS < lin){
+        lin = 0;
+	}
+    else{
+        addr = lin_address[lin];
+	}
+    addr += col;
+    lcd_send_cmd(0x80 | addr);
+}
+
+

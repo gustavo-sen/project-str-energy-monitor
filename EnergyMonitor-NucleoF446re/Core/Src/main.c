@@ -19,8 +19,15 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+
 #include "lcd_interface.h"
 #include "hc05_bluetooth.h"
+#include "PZEM.h"
+
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -68,6 +75,7 @@ static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_I2C1_Init(void);
 void StartDefaultTask(void *argument);
+void BlinkTaskTest(void *pvParameters);
 
 /* USER CODE BEGIN PFP */
 
@@ -75,6 +83,8 @@ void StartDefaultTask(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+SemaphoreHandle_t mySemaphor;
+static TaskHandle_t TaskHandler;
 
 /* USER CODE END 0 */
 
@@ -86,7 +96,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -111,18 +121,23 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_I2C1_Init();
+  
+  lcd_init(hi2c1);
+  init_pzem(huart1);  
   /* USER CODE BEGIN 2 */
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();
+  //osKernelInitialize();
+  
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
+  mySemaphor = xSemaphoreCreateBinary();
+  xSemaphoreGive(mySemaphor);
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
@@ -136,8 +151,9 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
+  //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes); // E UMA TAREFA GENERICA PORTATIL 
+  xTaskCreate(StartDefaultTask, "DefaultTask", 2048, NULL, tskIDLE_PRIORITY, NULL);
+  xTaskCreate(BlinkTaskTest, "Blink", 2048, NULL, tskIDLE_PRIORITY, NULL);
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -147,8 +163,9 @@ int main(void)
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
-  osKernelStart();
-
+  //osKernelStart();
+  vTaskStartScheduler();
+  
   /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
@@ -302,6 +319,8 @@ static void MX_USART2_UART_Init(void)
   if (HAL_UART_Init(&huart2) != HAL_OK)
   {
     Error_Handler();
+      
+
   }
   /* USER CODE BEGIN USART2_Init 2 */
 
@@ -390,21 +409,44 @@ static void MX_GPIO_Init(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
+void StartDefaultTask(void *pvParameters){
   /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  lcd_init(hi2c1);
   hc05_bluetooth_init(huart3);
+      
   lcd_send_string("pedro angelus");
-  setLCDBrightness(26);
+  
+  osDelay(1000);
+  uint8_t count = 0;
+  
   for(;;)
   { 
+    lcd_clear();
+    lcd_put_cur(1,0);
+    char msg[21];
+    sprintf(msg, "cout angelus: %d", count++);
+    lcd_send_string(msg);
     char pedro[] = "Pedro Angelus\n\r";
     hc05_send_data(pedro);
     vTaskDelay(1000);
-  }
+  } 
   /* USER CODE END 5 */
+}
+
+void BlinkTaskTest(void *pvParameters){
+
+  uint8_t count = 0;
+
+  for(;;){
+    if(xSemaphoreTake(mySemaphor, portMAX_DELAY) == pdFALSE) return;
+    lcd_clear();
+    char msg[21];
+    sprintf(msg, "cout pedro: %d", count++);
+    lcd_send_string(msg);
+
+    HAL_GPIO_TogglePin(GPIOA, LD2_Pin);
+    xSemaphoreGive(mySemaphor);
+    vTaskDelay(500);
+  }
 }
 
 /**
@@ -418,7 +460,7 @@ void StartDefaultTask(void *argument)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-
+  
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM1) {
     HAL_IncTick();
