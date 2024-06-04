@@ -26,7 +26,7 @@
 #include "lcd_interface.h"
 #include "hc05_bluetooth.h"
 #include "PZEM.h"
-
+#include "serialization.h"
 #include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
@@ -55,7 +55,7 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
-
+static int contador = 0;
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -103,14 +103,14 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
+  contador++;
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
-
+  contador++;
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -173,7 +173,6 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -418,15 +417,21 @@ void StartDefaultTask(void *pvParameters){
   osDelay(1000);
   uint8_t count = 0;
   
+  lcd_put_cur(1,0);
+  meterData a;
   for(;;)
   { 
-    lcd_clear();
-    lcd_put_cur(1,0);
     char msg[21];
     sprintf(msg, "cout angelus: %d", count++);
     lcd_send_string(msg);
-    char pedro[] = "Pedro Angelus\n\r";
-    hc05_send_data(pedro);
+    
+    a.voltage = 250;
+    a.current_mA = 110;
+    a.frequency = 55;
+    a.potFact = 1;
+
+    bl_serialize(&a);
+    
     vTaskDelay(1000);
   } 
   /* USER CODE END 5 */
@@ -435,10 +440,9 @@ void StartDefaultTask(void *pvParameters){
 void BlinkTaskTest(void *pvParameters){
 
   uint8_t count = 0;
-
+  lcd_put_cur(1,0);
   for(;;){
     if(xSemaphoreTake(mySemaphor, portMAX_DELAY) == pdFALSE) return;
-    lcd_clear();
     char msg[21];
     sprintf(msg, "cout pedro: %d", count++);
     lcd_send_string(msg);

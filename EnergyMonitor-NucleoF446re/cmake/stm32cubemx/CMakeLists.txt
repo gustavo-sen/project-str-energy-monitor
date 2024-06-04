@@ -27,6 +27,8 @@ target_sources(stm32cubemx INTERFACE
     ../../Core/Src/main.c
     ../../Core/Src/hc05_bluetooth.c
     ../../Core/Src/lcd_interface.c
+    ../../Core/Src/serialization.c
+    ../../Core/Src/PZEM.c
     ../../Core/Src/freertos.c
     ../../Core/Src/stm32f4xx_it.c
     ../../Core/Src/stm32f4xx_hal_msp.c
